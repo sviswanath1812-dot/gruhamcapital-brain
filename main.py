@@ -62,7 +62,7 @@ async def add_slots(
 ):
     try:
         slot_id = db.add_slots(json.loads(data.model_dump_json()))
-        return Response(f"Slot Added with ID {slot_id}", 200)
+        return Response(f"Slot Added", 200)
     except Exception as e:
         return Response(f"Slot addition failed {e}", 500)
 

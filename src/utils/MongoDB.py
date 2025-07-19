@@ -58,7 +58,7 @@ class GruhamSlotsDB(GruhamDB):
         slot_data["availabile"] = slot_data["total"]
         added_id = self.collection.insert_one(slot_data)
         if added_id:
-            return added_id
+            return True
         return False
 
     def increase_slots(self, slot_id: str, number: int):
@@ -91,7 +91,12 @@ class GruhamSlotsDB(GruhamDB):
 
     def get_all_slots(self, starttime: int, endtime: int) -> list[dict]:
         records: Cursor = self.collection.find(
-            {"starttime": {"$gte": starttime}, "endtime": {"$lte": endtime}}
+            {
+                "$and": [
+                    {"starttime": {"$gte": starttime}},
+                    {"endtime": {"$lte": endtime}},
+                ]
+            }
         )
 
         final_records = []
