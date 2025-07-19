@@ -9,8 +9,17 @@ from src.utils.Models import Consultation, Slot
 from src.utils.Constants import GruhamTimes
 import json
 from bson.errors import InvalidId
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/ping")
