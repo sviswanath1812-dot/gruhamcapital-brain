@@ -11,13 +11,13 @@ from src.utils.Constants import (
 )
 
 
-class GruhamDB:
+class GrishamDB:
     def __init__(self):
         self.client = MongoClient(MONGO_URL, tls=True, tlsAllowInvalidCertificates=True)
         self.database = self.client.get_database(DATABASE_NAME)
 
 
-class GruhamConsultationsDB(GruhamDB):
+class GrishamConsultationsDB(GrishamDB):
     def __init__(self):
         super().__init__()
         self.collection = self.database.get_collection(CONSULTATION_DB)
@@ -49,7 +49,7 @@ class GruhamConsultationsDB(GruhamDB):
         return final_records
 
 
-class GruhamSlotsDB(GruhamDB):
+class GrishamSlotsDB(GrishamDB):
     def __init__(self):
         super().__init__()
         self.collection = self.database.get_collection(SLOTS_DB)
@@ -109,8 +109,8 @@ class GruhamSlotsDB(GruhamDB):
 
 
 # this global variable is for maintaining singleton
-gruham_slots_db = GruhamSlotsDB()
-gruham_consultations_db = GruhamConsultationsDB()
+gruham_slots_db = GrishamSlotsDB()
+gruham_consultations_db = GrishamConsultationsDB()
 
 
 def get_connected_consultations_database():

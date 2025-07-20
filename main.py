@@ -1,12 +1,13 @@
 from fastapi import FastAPI, Depends, Response
 from src.utils.MongoDB import (
     get_connected_slot_database,
-    GruhamSlotsDB,
+    GrishamSlotsDB,
     get_connected_consultations_database,
-    GruhamConsultationsDB,
+    GrishamConsultationsDB,
 )
 from src.utils.Models import Consultation, Slot
-from src.utils.Constants import GruhamTimes
+from src.utils.Constants import GrishamTimes
+from src.utils.helpers import get_admin_hash
 import json
 from bson.errors import InvalidId
 from fastapi.middleware.cors import CORSMiddleware
@@ -31,7 +32,7 @@ async def ping_api():
 @app.post("/add_consultation")
 async def add_consulatation(
     data: Consultation,
-    db: GruhamConsultationsDB = Depends(get_connected_consultations_database),
+    db: GrishamConsultationsDB = Depends(get_connected_consultations_database),
 ):
     try:
         db.add_consultation(json.loads(data.model_dump_json()))
@@ -42,10 +43,10 @@ async def add_consulatation(
 
 @app.post("/consultations")
 async def get_consultations(
-    starttime: int = GruhamTimes.DEFAULT_START.value,
-    endtime: int = GruhamTimes.DEFAULT_END.value,
+    starttime: int = GrishamTimes.DEFAULT_START.value,
+    endtime: int = GrishamTimes.DEFAULT_END.value,
     consultation_id: str = "",
-    db: GruhamConsultationsDB = Depends(get_connected_consultations_database),
+    db: GrishamConsultationsDB = Depends(get_connected_consultations_database),
 ):
     try:
         return db.get_consultations(starttime, endtime, consultation_id)
@@ -58,7 +59,7 @@ async def get_consultations(
 # Slots
 @app.post("/add_slots")
 async def add_slots(
-    data: Slot, db: GruhamSlotsDB = Depends(get_connected_slot_database)
+    data: Slot, db: GrishamSlotsDB = Depends(get_connected_slot_database)
 ):
     try:
         slot_id = db.add_slots(json.loads(data.model_dump_json()))
@@ -69,7 +70,7 @@ async def add_slots(
 
 @app.post("/increase_availablity")
 async def increase_slots(
-    slot_id: str, number: int, db: GruhamSlotsDB = Depends(get_connected_slot_database)
+    slot_id: str, number: int, db: GrishamSlotsDB = Depends(get_connected_slot_database)
 ):
     try:
         db.increase_slots(slot_id, number)
@@ -80,7 +81,7 @@ async def increase_slots(
 
 @app.post("/decrease_availablity")
 async def increase_slots(
-    slot_id: str, number: int, db: GruhamSlotsDB = Depends(get_connected_slot_database)
+    slot_id: str, number: int, db: GrishamSlotsDB = Depends(get_connected_slot_database)
 ):
     try:
         db.decrease_slots(slot_id, number)
@@ -91,7 +92,7 @@ async def increase_slots(
 
 @app.get("/slot_availability/{slot_id}")
 async def slot_availability(
-    slot_id: str, db: GruhamSlotsDB = Depends(get_connected_slot_database)
+    slot_id: str, db: GrishamSlotsDB = Depends(get_connected_slot_database)
 ):
     try:
         slots = db.get_availability(slot_id)
@@ -102,11 +103,22 @@ async def slot_availability(
 
 @app.post("/slots")
 async def get_slots(
-    starttime: int = GruhamTimes.DEFAULT_START.value,
-    endtime: int = GruhamTimes.DEFAULT_END.value,
-    db: GruhamSlotsDB = Depends(get_connected_slot_database),
+    starttime: int = GrishamTimes.DEFAULT_START.value,
+    endtime: int = GrishamTimes.DEFAULT_END.value,
+    db: GrishamSlotsDB = Depends(get_connected_slot_database),
 ):
     try:
         return db.get_all_slots(starttime, endtime)
     except Exception as e:
         return Response(f"Slots availability failed {e}", 500)
+
+
+# User APIs
+@app.post("/verify_admin")
+async def verify_admin(admin_token: str):
+    try:
+        if admin_token == get_admin_hash():
+            return {"status": True}
+        return {"status": False}
+    except Exception as e:
+        return Response(f"Verification failed {e}", 500)
