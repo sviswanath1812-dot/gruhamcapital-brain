@@ -44,6 +44,7 @@ class GruhamConsultationsDB(GruhamDB):
         final_records = []
         for record in records:
             record["id"] = str(record["_id"])
+            del record["_id"]
             final_records.append(record)
         return final_records
 
@@ -102,6 +103,7 @@ class GruhamSlotsDB(GruhamDB):
         final_records = []
         for record in records:
             record["id"] = str(record["_id"])
+            del record["_id"]
             final_records.append(record)
         return final_records
 
