@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-class GrishamTimes(Enum):
+class GruhamTimes(Enum):
     DEFAULT_START: int = 0
     DEFAULT_END: int = 100000000000000
 

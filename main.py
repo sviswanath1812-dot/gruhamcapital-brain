@@ -5,8 +5,14 @@ from src.utils.MongoDB import (
     get_connected_consultations_database,
     GrishamConsultationsDB,
 )
-from src.utils.Models import Consultation, Slot
-from src.utils.Constants import GrishamTimes
+from src.utils.Models import (
+    Consultation,
+    Slot,
+    SlotsDTO,
+    SlotsAvailabilityDTO,
+    ConsultationsDTO,
+)
+from src.utils.Constants import GruhamTimes
 from src.utils.helpers import get_admin_hash
 import json
 from bson.errors import InvalidId
@@ -43,13 +49,15 @@ async def add_consulatation(
 
 @app.post("/consultations")
 async def get_consultations(
-    starttime: int = GrishamTimes.DEFAULT_START.value,
-    endtime: int = GrishamTimes.DEFAULT_END.value,
-    consultation_id: str = "",
+    consultations_options: ConsultationsDTO,
     db: GrishamConsultationsDB = Depends(get_connected_consultations_database),
 ):
     try:
-        return db.get_consultations(starttime, endtime, consultation_id)
+        return db.get_consultations(
+            consultations_options.starttime,
+            consultations_options.endtime,
+            consultations_options.consultation_id,
+        )
     except InvalidId as e:
         return Response(f"Given Consultation ID is Invalid")
     except Exception as e:
@@ -62,7 +70,7 @@ async def add_slots(
     data: Slot, db: GrishamSlotsDB = Depends(get_connected_slot_database)
 ):
     try:
-        slot_id = db.add_slots(json.loads(data.model_dump_json()))
+        db.add_slots(json.loads(data.model_dump_json()))
         return Response(f"Slot Added", 200)
     except Exception as e:
         return Response(f"Slot addition failed {e}", 500)
@@ -70,10 +78,11 @@ async def add_slots(
 
 @app.post("/increase_availablity")
 async def increase_slots(
-    slot_id: str, number: int, db: GrishamSlotsDB = Depends(get_connected_slot_database)
+    availability_options: SlotsAvailabilityDTO,
+    db: GrishamSlotsDB = Depends(get_connected_slot_database),
 ):
     try:
-        db.increase_slots(slot_id, number)
+        db.increase_slots(availability_options.slot_id, availability_options.number)
         return Response("Slots increased to the timeframe slot", 200)
     except Exception as e:
         return Response(f"Slots increase failed {e}", 500)
@@ -81,10 +90,11 @@ async def increase_slots(
 
 @app.post("/decrease_availablity")
 async def increase_slots(
-    slot_id: str, number: int, db: GrishamSlotsDB = Depends(get_connected_slot_database)
+    availability_options: SlotsAvailabilityDTO,
+    db: GrishamSlotsDB = Depends(get_connected_slot_database),
 ):
     try:
-        db.decrease_slots(slot_id, number)
+        db.decrease_slots(availability_options.slot_id, availability_options.number)
         return Response("Slots increased to the timeframe slot", 200)
     except Exception as e:
         return Response(f"Slots increase failed {e}", 500)
@@ -101,14 +111,13 @@ async def slot_availability(
         return Response(f"Slots availability failed {e}", 500)
 
 
-@app.post("/slots")
+@app.post("/slots/")
 async def get_slots(
-    starttime: int = GrishamTimes.DEFAULT_START.value,
-    endtime: int = GrishamTimes.DEFAULT_END.value,
+    slot_options: SlotsDTO,
     db: GrishamSlotsDB = Depends(get_connected_slot_database),
 ):
     try:
-        return db.get_all_slots(starttime, endtime)
+        return db.get_all_slots(slot_options.starttime, slot_options.endtime)
     except Exception as e:
         return Response(f"Slots availability failed {e}", 500)
 
